@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presensi Sekolah & PKL - SMARTAS Sawit Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style4.css">
+    <style>
+        /* UI Helper agar sinkron dengan mapel */
+        .student-search-wrapper { margin-bottom: 15px; position: relative; }
+        .student-search-input {
+            padding-left: 40px !important;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="%232E7D32" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>');
+            background-repeat: no-repeat;
+            background-position: 15px center;
+        }
+        .btn-small {
+            background: #2E7D32; color: white; border: none; padding: 6px 14px;
+            border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer;
+            transition: 0.3s;
+        }
+        /* List Siswa Box */
+        .student-list {
+            background: #fdfdfd; border: 2px solid #f0f0f0;
+            border-radius: 25px; height: 300px; overflow-y: auto;
+            padding: 15px; margin-bottom: 20px; transition: opacity 0.3s ease;
+        }
+        .student-item { 
+            display: flex; align-items: center; padding: 12px; 
+            border-bottom: 1px solid #f8f8f8; border-radius: 12px; transition: 0.2s; 
+        }
+        .student-item:hover { background: #f1f8f1; }
+        .student-item input { width: 18px !important; height: 18px !important; margin-right: 15px; accent-color: #2E7D32; }
+        .student-item span { font-size: 14px; color: #444; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="bg-deco leaf-1">🍃</div>
+    <div class="bg-deco leaf-2">🌿</div>
+
+    <aside class="main-sidebar">
+        <div class="logo-wrapper">
+            <div class="logo-circle">
+                <img src="logo-smkn-2-sby.jpg" alt="Logo SMKN 2 SBY">
+            </div>
+            <h2>SMARTAS</h2>
+            <p>Admin Dashboard</p>
+        </div>
+        
+        <nav class="nav-menu">
+            <a href="index.html">📊 Dashboard</a>
+            <a href="admin_jadwal.html">📅 Jadwal Mapel</a>
+            <a href="admin_presensi_pkl.html" class="active">🏫 Presensi Sekolah</a>
+            <a href="admin_presensi_mapel.html">📚 Pengaturan</a>
+        </nav>
+    </aside>
+
+    <main class="content">
+        <header class="header-section">
+            <h1 class="header-title">PENGATURAN KONDISI SISWA</h1>
+            <div class="date-badge">Sekolah / Prakerin (PKL)</div>
+        </header>
+
+        <section class="container-box entry-ani">
+            <div class="form-group">
+                <label>Pilih Kelas</label>
+                <select id="select-kelas" class="custom-select" onchange="generateUniqueStudents()">
+                    <option value="">-- Pilih Kelas --</option>
+                    <option value="X TKJ 1">X TKJ 1</option>
+                    <option value="X TKJ 2">X TKJ 2</option>
+                    <option value="XI RPL 1">XI RPL 1</option>
+                    <option value="XI RPL 2">XI RPL 2</option>
+                    <option value="XII MM 1">XII MM 1</option>
+                    <option value="XII DKV 1">XII DKV 1</option>
+                    <option value="X TITL 1">X TITL 1</option>
+                    <option value="XI TKR 1">XI TKR 1</option>
+                    <option value="XII TP 1">XII TP 1</option>
+                    <option value="X TEI 1">X TEI 1</option>
+                    <option value="XI TAB 1">XI TAB 1</option>
+                    <option value="XII TKJ 1">XII TKJ 1</option>
+                    <option value="XII RPL 1">XII RPL 1</option>
+                    <option value="X MM 1">X MM 1</option>
+                    <option value="XI DKV 2">XI DKV 2</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Kondisi Saat Ini</label>
+                <div class="radio-toggle-group">
+                    <label class="radio-card">
+                        <input type="radio" name="st" onclick="togglePKL(false)" checked>
+                        <div class="radio-content">
+                            <span class="icon">🏫</span>
+                            <span class="text">Sekolah</span>
+                        </div>
+                    </label>
+                    <label class="radio-card">
+                        <input type="radio" name="st" onclick="togglePKL(true)">
+                        <div class="radio-content">
+                            <span class="icon">🏢</span>
+                            <span class="text">PKL (Prakerin)</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            
+            <div id="pklField" class="pkl-section">
+                <div class="form-group">
+                    <label>Lokasi / Nama Perusahaan</label>
+                    <input type="text" placeholder="Contoh: PT. Telkom Indonesia">
+                </div>
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;"><label>Jam Masuk</label><input type="time"></div>
+                    <div class="form-group" style="flex: 1;"><label>Jam Pulang</label><input type="time"></div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <label id="list-label" style="margin-bottom: 0;">Pilih Siswa</label>
+                    <button type="button" id="btn-select-all" class="btn-small" onclick="toggleSelectAll()" style="display: none;">✅ Pilih Semua</button>
+                </div>
+                
+                <div class="student-search-wrapper">
+                    <input type="text" id="student-search" class="student-search-input" placeholder="Cari nama siswa..." oninput="filterStudents()">
+                </div>
+
+                <div class="student-list" id="student-container">
+                    <div style="text-align: center; padding-top: 100px; color: #999;">
+                        <p>⚠️ Silakan pilih kelas terlebih dahulu.</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-save">Simpan Perubahan Kondisi</button>
+        </section>
+    </main>
+
+    <script>
+        const firstNames = ["Ahmad", "Budi", "Candra", "Dahril", "Eka", "Feri", "Guntur", "Hana", "Indra", "Jaka", "Kevin", "Laras", "Muhammad", "Nurul", "Oki", "Putra", "Rizky", "Siti", "Taufik", "Umar"];
+        const lastNames = ["Fauzi", "Santoso", "Ramadhan", "Putri", "Wijaya", "Pratama", "Meilani", "Kusuma", "Tarub", "Sanjaya", "Hidayah", "Setiana", "Aditya", "Ananda", "Saputra"];
+        
+        let masterStudentList = [];
+        let isAllSelected = false;
+
+        function togglePKL(isPKL) {
+            const pklField = document.getElementById('pklField');
+            if (isPKL) { pklField.classList.add('active'); } 
+            else { pklField.classList.remove('active'); }
+        }
+
+        function generateUniqueStudents() {
+            const kelas = document.getElementById('select-kelas').value;
+            const container = document.getElementById('student-container');
+            const btnSelect = document.getElementById('btn-select-all');
+            if(!kelas) { btnSelect.style.display = 'none'; return; }
+
+            container.style.opacity = '0';
+            btnSelect.style.display = 'block';
+            btnSelect.innerText = "✅ Pilih Semua";
+            isAllSelected = false;
+            
+            setTimeout(() => {
+                document.getElementById('list-label').innerText = "Siswa Kelas: " + kelas;
+                masterStudentList = [];
+                const seed = kelas.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+                const jumlahSiswa = 15 + (seed % 10);
+                for(let i=0; i<jumlahSiswa; i++) {
+                    const fName = firstNames[(seed + i) % firstNames.length];
+                    const lName = lastNames[(seed * i) % lastNames.length];
+                    masterStudentList.push(fName + " " + lName);
+                }
+                renderStudents(masterStudentList);
+                container.style.opacity = '1';
+            }, 300);
+        }
+
+        function toggleSelectAll() {
+            const checkboxes = document.querySelectorAll('#student-container input[type="checkbox"]');
+            const btnSelect = document.getElementById('btn-select-all');
+            isAllSelected = !isAllSelected;
+            checkboxes.forEach(cb => cb.checked = isAllSelected);
+            btnSelect.innerText = isAllSelected ? "❌ Batal Semua" : "✅ Pilih Semua";
+            btnSelect.style.background = isAllSelected ? "#d63031" : "#2E7D32";
+        }
+
+        function filterStudents() {
+            const val = document.getElementById('student-search').value.toLowerCase();
+            renderStudents(masterStudentList.filter(s => s.toLowerCase().includes(val)));
+        }
+
+        function renderStudents(list) {
+            const container = document.getElementById('student-container');
+            if(list.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding-top:50px; color:#999;">Siswa tidak ditemukan...</div>';
+                return;
+            }
+            container.innerHTML = list.map(name => `
+                <div class="student-item">
+                    <input type="checkbox" ${isAllSelected ? 'checked' : ''}> <span>${name}</span>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
